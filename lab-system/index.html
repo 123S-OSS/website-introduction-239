@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>实验室管理系统 - 登录</title>
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="logo">
+            <h1>🔬 实验室管理系统</h1>
+        </div>
+        
+        <form id="loginForm" class="auth-form">
+            <h2>用户登录</h2>
+            <div id="errorMessage" class="error-message"></div>
+            
+            <div class="input-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" placeholder="输入账号" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" placeholder="输入密码" required>
+            </div>
+            
+            <button type="submit">登 录</button>
+            
+            <div class="footer-note">
+                <p>测试账号: admin | 密码: 123456</p>
+            </div>
+        </form>
+    </div>
+
+    <script src="js/auth.js"></script>
+</body>
+</html>

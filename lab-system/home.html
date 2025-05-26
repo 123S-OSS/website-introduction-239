@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>实验室管理系统</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+        // 自动检查登录状态（无需修改）
+        if (!localStorage.getItem('isLoggedIn')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+</head>
+<body>
+    <div class="user-panel">
+        欢迎，<span id="displayUsername">管理员</span>
+        <button onclick="logout()" class="logout-btn">退出</button>
+    </div>
+
+    <div class="container">
+        <div id="home" class="active-section">
+            <div class="header">
+                <h1>实验室管理系统</h1>
+                <p>请选择需要使用的功能模块</p>
+            </div>
+            <div class="nav-cards">
+                <div class="nav-card" onclick="showSection('management')">
+                    <h2>药品管理系统</h2>
+                    <p>试剂定位｜库存管理｜3D导览</p>
+                </div>
+                <div class="nav-card" onclick="showSection('calculator')">
+                    <h2>药品配置工具</h2>
+                    <p>浓度计算｜质量换算｜快速定位</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 药品管理模块 -->
+        <div id="management" class="content-section">
+            <button onclick="showSection('home')">← 返回主页</button>
+            <h2 style="margin:1rem 0">药品管理系统</h2>
+            
+            <div class="management-panel">
+                <div class="add-chemical-form">
+                    <h3>🗃️ 添加新药品</h3>
+                    <form onsubmit="addNewChemical(event)">
+                        <div class="form-group">
+                            <input type="text" id="chemName" placeholder="药品名称" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label style="display:flex;align-items:center;gap:0.5rem">
+                                <input type="checkbox" id="isDangerous">
+                                ⚠️ 危险品
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <input type="number" id="chemQuantity" placeholder="数量（g/mL）" step="0.1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <input type="number" id="chemCount" placeholder="件数" required>
+                        </div>
+
+                        <div class="form-group">
+                            <select id="chemLocation">
+                                <option value="">选择储存位置</option>
+                                <option value="危化柜">危化柜</option>
+                                <option value="冰箱">冰箱</option>
+                                <option value="普通柜">普通柜</option>
+                            </select>
+                        </div>
+
+                        <button type="submit">➕ 添加药品</button>
+                    </form>
+                </div>
+                <div class="usage-registration">
+                    <h3>📝 药品使用登记</h3>
+                    <form id="usageForm">
+                        <div class="form-group">
+                            <select id="chemSelect" required>
+                                <option value="">选择药品...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="number" id="usageAmount" placeholder="使用量(g/mL)" step="0.1" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="userName" placeholder="使用人" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="usagePurpose" placeholder="用途" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="date" id="usageDate" required>
+                        </div>
+                        <button type="submit">登记使用记录</button>
+                        <button type="button" id="printBtn" class="print-btn">🖨️ 打印记录</button>
+                    </form>
+                    <div id="usageRecords" class="usage-records"></div>
+                </div>
+                <div>
+                    <input type="text" placeholder="🔍 搜索药品..." 
+                           style="width:100%;padding:0.8rem"
+                           oninput="searchChemical(this.value)">
+                    <div id="3d-container"></div>
+                    <div id="searchResults" style="margin-top:1rem"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 计算器模块 -->
+        <div id="calculator" class="content-section">
+            <button onclick="showSection('home')">← 返回主页</button>
+            <h2 style="margin:1rem 0">溶液配置工具</h2>
+            
+            <div style="max-width:600px;margin:0 auto">
+                <div class="calculator-types">
+                    <div class="calculator-type active" onclick="changeCalculatorType('solid')">固体配置</div>
+                    <div class="calculator-type" onclick="changeCalculatorType('liquid')">液体配置</div>
+                </div>
+
+                <div id="solidCalculator" style="display:grid;gap:1rem">
+                    <input type="number" id="targetConcentration" placeholder="目标浓度 (mol/L)" step="0.1">
+                    <input type="number" id="targetVolume" placeholder="目标体积 (L)" step="0.1">
+                    <input type="number" id="molarMass" placeholder="摩尔质量 (g/mol)" step="0.1">
+                    <button onclick="calculateSolid()">📝 计算质量</button>
+                </div>
+
+                <div id="liquidCalculator" style="display:none;gap:1rem">
+                    <input type="number" id="liquidConcentration" placeholder="目标浓度 (mol/L)" step="0.1">
+                    <input type="number" id="liquidVolume" placeholder="目标体积 (L)" step="0.1">
+                    <input type="number" id="stockConcentration" placeholder="母液浓度 (mol/L)" step="0.1">
+                    <button onclick="calculateLiquid()">🧪 计算取液量</button>
+                </div>
+
+                <div id="result" style="margin:1rem 0;padding:1rem;background:#fff;border-radius:8px"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3D库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- 本地JS -->
+    <script src="js/three-init.js"></script>
+    <script src="js/main.js"></script>
+    
+    <script>
+        // 显示当前用户
+        document.getElementById('displayUsername').textContent = 
+            localStorage.getItem('username') || '管理员';
+        
+        // 退出功能
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('username');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
